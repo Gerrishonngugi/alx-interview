@@ -2,35 +2,29 @@
 const request = require('request');
 
 const movieId = process.argv[2];
-const url = `https://swapi-api.hbtn.io/api/films/${movieId}`;
+const url = `https://swapi-api.alx-tools.com/api/films/${movieId}`;
 
-request(url, (err, res, body) => {
-  if (err) {
-    console.error(err);
+request(url, (error, response, body) => {
+  if (error) {
+    console.error(error);
     return;
   }
 
-  const film = JSON.parse(body);
-  const characterUrls = film.characters;
+  const characters = JSON.parse(body).characters;
+  let count = 0;
 
-  Promise.all(characterUrls.map((url) =>
-    new Promise((resolve, reject) => {
-      request(url, (err, res, body) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+  const printCharacter = (index) => {
+    if (index === characters.length) return;
 
-        const character = JSON.parse(body);
-        console.log(character.name);
-        resolve();
-      });
-    })
-  ))
-  .then(() => {
-    console.log('All character names printed!');
-  })
-  .catch((err) => {
-    console.error('Error fetching character names:', err);
-  });
+    request(characters[index], (error, response, body) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      console.log(JSON.parse(body).name);
+      printCharacter(index + 1);
+    });
+  };
+
+  printCharacter(0);
 });
